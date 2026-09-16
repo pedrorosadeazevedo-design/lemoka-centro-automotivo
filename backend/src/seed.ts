@@ -4,35 +4,35 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando seed do banco de dados Forza 1...');
+  console.log('🌱 Iniciando seed do banco de dados Lemoka Centro Automotivo...');
 
   // 1. Criar Usuários
-  const senhaOperacional = await bcrypt.hash('forza123', 10);
+  const senhaOperacional = await bcrypt.hash('lemoka123', 10);
   const senhaAdmin = await bcrypt.hash('admin123', 10);
 
   const userOp = await prisma.usuario.upsert({
-    where: { email: 'operacional@forza1.com.br' },
+    where: { email: 'operacional@lemoka.com.br' },
     update: {},
     create: {
-      email: 'operacional@forza1.com.br',
+      email: 'operacional@lemoka.com.br',
       senhaHash: senhaOperacional,
       papel: 'OPERACIONAL'
     }
   });
 
   const userAdmin = await prisma.usuario.upsert({
-    where: { email: 'admin@forza1.com.br' },
+    where: { email: 'admin@lemoka.com.br' },
     update: {},
     create: {
-      email: 'admin@forza1.com.br',
+      email: 'admin@lemoka.com.br',
       senhaHash: senhaAdmin,
       papel: 'ADMIN'
     }
   });
 
   console.log('✅ Usuários criados:');
-  console.log('   Operacional: operacional@forza1.com.br / forza123');
-  console.log('   Admin: admin@forza1.com.br / admin123');
+  console.log('   Operacional: operacional@lemoka.com.br / lemoka123');
+  console.log('   Admin: admin@lemoka.com.br / admin123');
 
   // 2. Criar Mecânicos
   const mecanico1 = await prisma.mecanico.create({

@@ -242,7 +242,7 @@ export const downloadPDF = async (req: AuthRequest, res: Response) => {
     const pdfBuffer = await generateReceiptPDF(atendimento);
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=Nota_Forza1_${atendimento.id.substring(0, 8)}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=Nota_Lemoka_${atendimento.id.substring(0, 8)}.pdf`);
     return res.send(pdfBuffer);
   } catch (error) {
     console.error('Erro ao gerar PDF do atendimento:', error);

@@ -134,7 +134,7 @@ export const Mecanicos: React.FC = () => {
               </div>
 
               <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', textAlign: 'right' }}>
-                Ativo na oficina Forza 1
+                Ativo na oficina Lemoka Centro Automotivo
               </div>
             </div>
           ))}

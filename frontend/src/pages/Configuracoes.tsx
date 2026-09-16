@@ -10,8 +10,8 @@ export const Configuracoes: React.FC = () => {
 
   // Estados dos formulários
   const [empresa, setEmpresa] = useState<EmpresaConfig>({
-    razaoSocial: 'Forza 1 Centro Automotivo LTDA',
-    nomeFantasia: 'Forza 1',
+    razaoSocial: 'Lemoka Centro Automotivo LTDA',
+    nomeFantasia: 'Lemoka Centro Automotivo',
     cnpj: '37.912.027/0001-60',
     cep: '26290-600',
     endereco: 'Av. Abilio Augusto Távora',
@@ -103,7 +103,7 @@ export const Configuracoes: React.FC = () => {
       <div style={{ marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Configurações Administrativas</h2>
         <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          Gestão empresarial, parametrização fiscal para NFS-e e diagnóstico do sistema Forza 1.
+          Gestão empresarial, parametrização fiscal para NFS-e e diagnóstico do sistema Lemoka Centro Automotivo.
         </p>
       </div>
 
@@ -153,11 +153,11 @@ export const Configuracoes: React.FC = () => {
         </div>
       ) : (
         <>
-          {/* TAB 1: DADOS DA EMPRESA (FASE 2) */}
+          {/* TAB 1: DADOS DA EMPRESA */}
           {activeTab === 'empresa' && (
             <form onSubmit={handleSaveEmpresa} className="card">
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--gold)', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                1. Cadastro Empresarial (Forza 1 Centro Automotivo)
+                1. Cadastro Empresarial (Lemoka Centro Automotivo)
               </h3>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
@@ -332,7 +332,7 @@ export const Configuracoes: React.FC = () => {
               <div className="alert alert-info">
                 <AlertCircle size={20} />
                 <span>
-                  <strong>Nota:</strong> Esta área está preparada para receber os códigos e tributações fornecidos posteriormente pelo contador da Forza 1. Os campos não configurados permanecem como <em>"Pendente de configuração"</em>.
+                  <strong>Nota:</strong> Esta área está preparada para receber os códigos e tributações fornecidos posteriormente pelo contador da Lemoka Centro Automotivo. Os campos não configurados permanecem como <em>"Pendente de configuração"</em>.
                 </span>
               </div>
 
@@ -458,7 +458,7 @@ export const Configuracoes: React.FC = () => {
                   <ul style={{ fontSize: '0.78rem', color: 'var(--text-primary)', marginTop: '0.75rem', paddingLeft: '1.2rem', lineHeight: '1.6' }}>
                     <li>Todas as permissões do perfil Operacional</li>
                     <li>Exclusão de Registros de Mecânicos, Despesas e Tráfego</li>
-                    <li>Configurações Empresariais da Forza 1</li>
+                    <li>Configurações Empresariais do Lemoka</li>
                     <li>Parametrização Fiscal para NFS-e</li>
                     <li>Acesso às Configurações de Sistema</li>
                   </ul>
@@ -477,7 +477,7 @@ export const Configuracoes: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--bg-main)', borderRadius: 'var(--radius-sm)' }}>
                   <span>Empresa Ativa:</span>
-                  <strong>Forza 1 Centro Automotivo LTDA (CNPJ: 37.912.027/0001-60)</strong>
+                  <strong>LEMOKA CENTRO AUTOMOTIVO (CNPJ: 37.912.027/0001-60)</strong>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--bg-main)', borderRadius: 'var(--radius-sm)' }}>

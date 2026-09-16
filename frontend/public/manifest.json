@@ -1,6 +1,6 @@
 {
-  "short_name": "Forza 1",
-  "name": "Forza 1 Centro Automotivo",
+  "short_name": "Lemoka",
+  "name": "Lemoka Centro Automotivo",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -20,5 +20,5 @@
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
-  "description": "Sistema de Gestão Operacional e Financeira da Oficina Forza 1 Centro Automotivo"
+  "description": "Sistema de Gestão Operacional e Financeira da Oficina Lemoka Centro Automotivo"
 }

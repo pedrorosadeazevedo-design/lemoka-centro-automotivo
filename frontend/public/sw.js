@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Forza 1-pwa-v3';
+const CACHE_NAME = 'Lemoka-pwa-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json'
@@ -68,7 +68,7 @@ self.addEventListener('fetch', (event) => {
 
 // Web Push Notification Event
 self.addEventListener('push', (event) => {
-  let data = { title: 'Forza 1 Centro Automotivo', body: 'Nova atualização do sistema.' };
+  let data = { title: 'Lemoka Centro Automotivo', body: 'Nova atualização do sistema.' };
   if (event.data) {
     try {
       data = event.data.json();

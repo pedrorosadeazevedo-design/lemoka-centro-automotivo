@@ -55,7 +55,7 @@ export const Historico: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Comprovante_Forza 1_${(nomeCliente || 'Atendimento').replace(/\s+/g, '_')}.pdf`;
+      a.download = `Comprovante_Lemoka_${(nomeCliente || 'Atendimento').replace(/\s+/g, '_')}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();

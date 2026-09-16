@@ -41,10 +41,10 @@ export const Login: React.FC = () => {
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <img 
             src="/logo.png?v=99" 
-            alt="Forza 1 Centro Automotivo Logo Oficial" 
-            style={{ width: '100%', maxWidth: '290px', height: 'auto', margin: '0 auto', display: 'block', objectFit: 'contain' }}
+            alt="Lemoka Centro Automotivo Logo Oficial" 
+            style={{ height: '70px', width: 'auto', margin: '0 auto', objectFit: 'contain' }} 
           />
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', marginTop: '1rem', fontWeight: 700 }}>Forza 1 Centro Automotivo</h2>
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', marginTop: '1rem', fontWeight: 700 }}>Lemoka Centro Automotivo</h2>
           <p style={{ fontSize: '0.9rem', color: 'var(--gold)', marginTop: '0.2rem', fontWeight: 600 }}>
             Qualidade e Velocidade em Cada Serviço
           </p>
@@ -69,7 +69,7 @@ export const Login: React.FC = () => {
               <input
                 type="email"
                 className="form-input"
-                placeholder="seu-email@forza1.com.br"
+                placeholder="seu-email@lemoka.com.br"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

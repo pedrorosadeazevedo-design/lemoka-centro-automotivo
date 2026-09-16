@@ -89,7 +89,7 @@ export const Dashboard: React.FC = () => {
   if (loading || !data) {
     return (
       <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-secondary)' }}>
-        Carregando indicadores do Forza 1...
+        Carregando indicadores da Lemoka Centro Automotivo...
       </div>
     );
   }
@@ -314,7 +314,7 @@ export const Dashboard: React.FC = () => {
 
           <div className="card">
             <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--gold)' }}>
-              Resumo Operacional Forza 1
+              Resumo Operacional Lemoka Centro Automotivo
             </h3>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem' }}>
               <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>

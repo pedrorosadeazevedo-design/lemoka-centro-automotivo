@@ -17,30 +17,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('@forza1:token');
+    const token = localStorage.getItem('@lemoka:token') || localStorage.getItem('@forza1:token');
     if (token) {
-      api.get('/auth/me')
-        .then((res) => {
-          setUsuario(res.data);
-        })
-        .catch(() => {
-          logout();
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+      try {
+        const decoded: any = jwtDecode(token);
+        const isExpired = decoded.exp ? decoded.exp * 1000 < Date.now() : false;
+        if (!isExpired) {
+          setUsuario({ id: decoded.id, email: decoded.email, papel: decoded.papel });
+        } else {
+          localStorage.removeItem('@lemoka:token');
+          localStorage.removeItem('@forza1:token');
+        }
+      } catch {
+        localStorage.removeItem('@lemoka:token');
+        localStorage.removeItem('@forza1:token');
+      }
     }
+    setLoading(false);
   }, []);
 
-  const login = async (email: string, senha: string) => {
-    const response = await api.post('/auth/login', { email, senha });
-    const { token, usuario: user } = response.data;
-
-    localStorage.setItem('@forza1:token', token);
-    setUsuario(user);
+  const login = (token: string, usuario: Usuario) => {
+    localStorage.setItem('@lemoka:token', token);
+    setUsuario(usuario);
   };
 
   const logout = () => {
+    localStorage.removeItem('@lemoka:token');
     localStorage.removeItem('@forza1:token');
     setUsuario(null);
   };

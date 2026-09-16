@@ -18,7 +18,7 @@ if (!vapidPublicKey || !vapidPrivateKey) {
 
 export const config = {
   port: process.env.PORT || 3001,
-  jwtSecret: jwtSecret || 'forza1_prod_secret_key_8f93a1c2b5d4e6f7a8b9c0d1e2f3a4b5',
+  jwtSecret: jwtSecret || 'lemoka_prod_secret_key_8f93a1c2b5d4e6f7a8b9c0d1e2f3a4b5',
   vapidKeys: {
     publicKey: vapidPublicKey || '',
     privateKey: vapidPrivateKey || ''

@@ -14,7 +14,7 @@ export const login = async (req: Request, res: Response) => {
   }
 
   const emailClean = String(email).toLowerCase().trim();
-  const secret = config.jwtSecret || 'forza1_prod_secret_key_8f93a1c2b5d4e6f7a8b9c0d1e2f3a4b5';
+  const secret = config.jwtSecret || 'lemoka_prod_secret_key_8f93a1c2b5d4e6f7a8b9c0d1e2f3a4b5';
 
   // 1. Tenta autenticação no Banco de Dados PostgreSQL (Supabase)
   try {
@@ -23,20 +23,20 @@ export const login = async (req: Request, res: Response) => {
     // Auto-seed de usuários padrão se a tabela estiver limpa
     const totalUsuarios = await prisma.usuario.count().catch(() => 0);
     if (totalUsuarios === 0 || !usuario) {
-      if (emailClean === 'admin@forza1.com.br' || emailClean === 'operacional@forza1.com.br' || totalUsuarios === 0) {
+      if (emailClean === 'admin@lemoka.com.br' || emailClean === 'operacional@lemoka.com.br' || emailClean === 'admin@forza1.com.br' || emailClean === 'operacional@forza1.com.br' || totalUsuarios === 0) {
         const senhaAdminHash = await bcrypt.hash('admin123', 10);
-        const senhaOpHash = await bcrypt.hash('forza123', 10);
+        const senhaOpHash = await bcrypt.hash('lemoka123', 10);
 
         await prisma.usuario.upsert({
-          where: { email: 'admin@forza1.com.br' },
+          where: { email: 'admin@lemoka.com.br' },
           update: {},
-          create: { email: 'admin@forza1.com.br', senhaHash: senhaAdminHash, papel: 'ADMIN' }
+          create: { email: 'admin@lemoka.com.br', senhaHash: senhaAdminHash, papel: 'ADMIN' }
         }).catch(() => null);
 
         await prisma.usuario.upsert({
-          where: { email: 'operacional@forza1.com.br' },
+          where: { email: 'operacional@lemoka.com.br' },
           update: {},
-          create: { email: 'operacional@forza1.com.br', senhaHash: senhaOpHash, papel: 'OPERACIONAL' }
+          create: { email: 'operacional@lemoka.com.br', senhaHash: senhaOpHash, papel: 'OPERACIONAL' }
         }).catch(() => null);
 
         usuario = await prisma.usuario.findUnique({ where: { email: emailClean } }).catch(() => null);
@@ -63,27 +63,27 @@ export const login = async (req: Request, res: Response) => {
   }
 
   // 2. Fallback de Alta Disponibilidade se a conexão com o banco estiver indisponível ou com credenciais pendentes
-  if (emailClean === 'admin@forza1.com.br' && senha === 'admin123') {
+  if ((emailClean === 'admin@lemoka.com.br' || emailClean === 'admin@forza1.com.br') && senha === 'admin123') {
     const token = jwt.sign(
-      { id: 'fallback-admin-id', email: 'admin@forza1.com.br', papel: 'ADMIN' },
+      { id: 'fallback-admin-id', email: 'admin@lemoka.com.br', papel: 'ADMIN' },
       secret,
       { expiresIn: '30d' }
     );
     return res.json({
       token,
-      usuario: { id: 'fallback-admin-id', email: 'admin@forza1.com.br', papel: 'ADMIN' }
+      usuario: { id: 'fallback-admin-id', email: 'admin@lemoka.com.br', papel: 'ADMIN' }
     });
   }
 
-  if (emailClean === 'operacional@forza1.com.br' && senha === 'forza123') {
+  if ((emailClean === 'operacional@lemoka.com.br' || emailClean === 'operacional@forza1.com.br') && (senha === 'lemoka123' || senha === 'forza123')) {
     const token = jwt.sign(
-      { id: 'fallback-op-id', email: 'operacional@forza1.com.br', papel: 'OPERACIONAL' },
+      { id: 'fallback-op-id', email: 'operacional@lemoka.com.br', papel: 'OPERACIONAL' },
       secret,
       { expiresIn: '30d' }
     );
     return res.json({
       token,
-      usuario: { id: 'fallback-op-id', email: 'operacional@forza1.com.br', papel: 'OPERACIONAL' }
+      usuario: { id: 'fallback-op-id', email: 'operacional@lemoka.com.br', papel: 'OPERACIONAL' }
     });
   }
 

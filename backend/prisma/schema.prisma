@@ -8,22 +8,27 @@ generator client {
 }
 
 model Usuario {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  senhaHash String
-  papel     String   @default("OPERACIONAL") // OPERACIONAL | ADMIN
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String         @id @default(uuid())
+  email         String         @unique
+  senhaHash     String
+  papel         String         @default("OPERACIONAL") // OPERACIONAL | ADMIN
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  ordensServico      OrdemServico[]
+  followUps          TarefaFollowUp[]
+  observacoesCliente ObservacaoCliente[]
 
   @@map("usuarios")
 }
 
 model Mecanico {
-  id            String        @id @default(uuid())
+  id            String         @id @default(uuid())
   nome          String
   especialidade String
-  createdAt     DateTime      @default(now())
+  createdAt     DateTime       @default(now())
   atendimentos  Atendimento[]
+  ordensServico OrdemServico[]
+  itensServico  OSItemService[]
 
   @@map("mecanicos")
 }
@@ -86,10 +91,260 @@ model Atendimento {
   @@map("atendimentos")
 }
 
+model Cliente {
+  id            String         @id @default(uuid())
+  nome          String
+  tipoDocumento String         @default("CPF") // CPF | CNPJ
+  documento     String?        @unique
+  telefone      String?
+  email         String?
+  cep           String?
+  endereco      String?
+  numero        String?
+  complemento   String?
+  bairro        String?
+  cidade        String?
+  uf            String?
+  observacoes   String?
+  rg            String?
+  inscricaoEstadual String?
+  codigoIbge    String?
+  dataNascimento DateTime?
+  whatsapp      String?
+  classificacaoManual String?
+  osdigId       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  veiculos      Vehicle[]
+  ordensServico OrdemServico[]
+  contasReceber ContaReceber[]
+  documentosFiscais DocumentoFiscal[]
+  previsoesRetorno PrevisaoRetorno[]
+  followUps     TarefaFollowUp[]
+  tags          ClienteTag[]
+  observacoesInternas ObservacaoCliente[]
+
+  @@map("clientes")
+}
+
+model Vehicle {
+  id                 String         @id @default(uuid())
+  clienteId          String
+  cliente            Cliente        @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  placa              String         @unique
+  marca              String
+  modelo             String
+  versao             String?
+  anoFabricacao      Int?
+  anoModelo          Int?
+  motorizacao        String?
+  combustivel        String?
+  chassi             String?
+  renavam            String?
+  cor                String?
+  quilometragemAtual Int?           @default(0)
+  proximaRevisaoKm   Int?
+  proximaRevisaoData DateTime?
+  observacoesTecnicas String?
+  osdigId            String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  ordensServico      OrdemServico[]
+  previsoesRetorno   PrevisaoRetorno[]
+  followUps          TarefaFollowUp[]
+
+  @@map("veiculos")
+}
+
+enum StatusOS {
+  OPEN
+  AWAITING_APPROVAL
+  APPROVED
+  IN_MAINTENANCE
+  AWAITING_PARTS
+  COMPLETED
+  BILLED
+  CANCELLED
+}
+
+model OrdemServico {
+  id               String          @id @default(uuid())
+  numeroOs         Int             @default(autoincrement()) @unique
+  publicToken      String?         @unique @default(uuid())
+  clienteId        String
+  cliente          Cliente         @relation(fields: [clienteId], references: [id])
+  veiculoId        String?
+  veiculo          Vehicle?        @relation(fields: [veiculoId], references: [id])
+  atendenteId      String
+  atendente        Usuario         @relation(fields: [atendenteId], references: [id])
+  mecanicoId       String?
+  mecanico         Mecanico?       @relation(fields: [mecanicoId], references: [id])
+  status           StatusOS        @default(OPEN)
+  dataAbertura     DateTime        @default(now())
+  previsaoEntrega  DateTime?
+  dataFechamento   DateTime?
+  observacoes      String?
+  subtotal         Decimal         @default(0) @db.Decimal(10, 2)
+  desconto         Decimal         @default(0) @db.Decimal(10, 2)
+  acrescimo        Decimal         @default(0) @db.Decimal(10, 2)
+  valorTotal       Decimal         @default(0) @db.Decimal(10, 2)
+  formaPagamento   String?
+  osdigId          String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  produtos         OSItemProduct[]
+  servicos         OSItemService[]
+  historicoStatus  OSStatusHistory[]
+  contasReceber    ContaReceber[]
+  documentosFiscais DocumentoFiscal[]
+  previsoesRetorno PrevisaoRetorno[]
+  followUps        TarefaFollowUp[]
+
+  @@map("ordens_servico")
+}
+
+model Produto {
+  id                  String               @id @default(uuid())
+  codigoInterno       String?              @unique
+  ean                 String?
+  referenciaFabricante String?
+  codigoOEM           String?
+  descricao           String
+  descricaoTecnica    String?
+  marca               String?
+  categoria           String?
+  unidade             String               @default("UN")
+  precoCusto          Decimal              @default(0) @db.Decimal(10, 2)
+  precoVenda          Decimal              @db.Decimal(10, 2)
+  precoPromocional    Decimal?             @db.Decimal(10, 2)
+  estoqueFisico       Decimal              @default(0) @db.Decimal(10, 2)
+  estoqueReservado    Decimal              @default(0) @db.Decimal(10, 2)
+  estoqueMinimo       Decimal              @default(0) @db.Decimal(10, 2)
+  estoqueMaximo       Decimal?             @db.Decimal(10, 2)
+  localizacao         String?
+  externalProvider    String?              // Ex: FRAGA
+  externalId          String?              // ID único da peça no catálogo externo
+  ncm                 String?
+  cest                String?
+  cfop                String?
+  cst                 String?
+  csosn               String?
+  origemMercadoria    String?              @default("0")
+  unidadeFiscal       String?              @default("UN")
+  gtin                String?
+  osdigId             String?
+  status              Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  osItens             OSItemProduct[]
+  movimentacoes       MovimentacaoEstoque[]
+  itensCompra         ItemCompra[]
+
+  @@map("produtos")
+}
+
+enum TipoMovimentacao {
+  ENTRADA
+  SAIDA
+  RESERVA
+  LIBERACAO_RESERVA
+  AJUSTE
+  ESTORNO
+}
+
+model MovimentacaoEstoque {
+  id              String           @id @default(uuid())
+  produtoId       String
+  produto         Produto          @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  tipo            TipoMovimentacao
+  quantidade      Decimal          @db.Decimal(10, 2)
+  estoqueAnterior Decimal          @db.Decimal(10, 2)
+  estoquePosterior Decimal         @db.Decimal(10, 2)
+  usuarioId       String?
+  origem          String           @default("MANUAL") // MANUAL | ORDEM_SERVICO | COMPRA | AJUSTE
+  ordemServicoId  String?
+  observacao      String?
+  createdAt       DateTime         @default(now())
+
+  @@map("movimentacoes_estoque")
+}
+
+model Servico {
+  id                  String          @id @default(uuid())
+  codigo              String?         @unique
+  descricao           String
+  precoPadrao         Decimal         @db.Decimal(10, 2)
+  tempoEstimadoMinutos Int?           @default(60)
+  categoria           String?
+  garantiaDias        Int?            @default(90)
+  codigoMunicipal     String?
+  issqn               Float?
+  aliquotaIss         Float?
+  naturezaOperacao    String?
+  retencaoIss         Boolean?        @default(false)
+  geraPrevisaoRetorno Boolean         @default(false)
+  intervaloDiasRetorno Int?           // Ex: 180 dias
+  intervaloKmRetorno  Int?           // Ex: 10000 km
+  osdigId             String?
+  status              Boolean         @default(true)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  osItens             OSItemService[]
+  previsoesRetorno    PrevisaoRetorno[]
+
+  @@map("servicos")
+}
+
+model OSItemProduct {
+  id             String       @id @default(uuid())
+  ordemServicoId String
+  ordemServico   OrdemServico @relation(fields: [ordemServicoId], references: [id], onDelete: Cascade)
+  productId      String?
+  produto        Produto?     @relation(fields: [productId], references: [id])
+  codigoInterno  String?
+  descricao      String
+  marca          String?
+  unidade        String?      @default("UN")
+  quantidade     Decimal      @default(1) @db.Decimal(10, 2)
+  precoUnitario  Decimal      @db.Decimal(10, 2)
+  custoUnitario  Decimal      @default(0) @db.Decimal(10, 2)
+  custoTotal     Decimal      @default(0) @db.Decimal(10, 2)
+  desconto       Decimal      @default(0) @db.Decimal(10, 2)
+  acrescimo      Decimal      @default(0) @db.Decimal(10, 2)
+  margemBruta    Decimal      @default(0) @db.Decimal(10, 2)
+  subtotal       Decimal      @db.Decimal(10, 2)
+  aprovado       Boolean?     @default(true)
+  createdAt      DateTime     @default(now())
+
+  @@map("os_itens_produtos")
+}
+
+model OSItemService {
+  id             String       @id @default(uuid())
+  ordemServicoId String
+  ordemServico   OrdemServico @relation(fields: [ordemServicoId], references: [id], onDelete: Cascade)
+  serviceId      String?
+  servico        Servico?     @relation(fields: [serviceId], references: [id])
+  descricao      String
+  mecanicoId     String?
+  mecanico       Mecanico?    @relation(fields: [mecanicoId], references: [id])
+  quantidade     Decimal      @default(1) @db.Decimal(10, 2)
+  precoUnitario  Decimal      @db.Decimal(10, 2)
+  custoMaoDeObra Decimal      @default(0) @db.Decimal(10, 2)
+  desconto       Decimal      @default(0) @db.Decimal(10, 2)
+  acrescimo      Decimal      @default(0) @db.Decimal(10, 2)
+  garantiaDias   Int?         @default(90)
+  subtotal       Decimal      @db.Decimal(10, 2)
+  aprovado       Boolean?     @default(true)
+  createdAt      DateTime     @default(now())
+
+  @@map("os_itens_servicos")
+}
+
 model EmpresaConfig {
   id                          String   @id @default(uuid())
-  razaoSocial                 String   @default("Forza 1 Centro Automotivo LTDA")
-  nomeFantasia                String   @default("Forza 1")
+  razaoSocial                 String   @default("Lemoka Centro Automotivo LTDA")
+  nomeFantasia                String   @default("Lemoka Centro Automotivo")
   cnpj                        String   @default("45.123.890/0001-12")
   inscricaoMunicipal          String?  @default("Pendente do contador")
   inscricaoEstadual           String?  @default("Pendente de confirmação")
@@ -105,7 +360,10 @@ model EmpresaConfig {
   email                       String?  @default("contato@forza1.com.br")
   logoUrl                     String?
   regimeTributario            String?  @default("Simples Nacional")
+  crt                         String?  @default("1")
+  codigoIbge                  String?  @default("3304557")
   informacoesFiscaisAdicionais String?
+  permitirEstoqueNegativo     Boolean  @default(true)
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt
 
@@ -126,6 +384,14 @@ model ConfiguracaoFiscal {
   retencoes              String?
   ambiente               String   @default("HOMOLOGACAO") // HOMOLOGACAO | PRODUCAO
   statusIntegracao       String   @default("Pendente de configuração")
+  serieNfe               String?  @default("1")
+  serieNfce              String?  @default("1")
+  serieNfse              String?  @default("1")
+  provedorFiscal         String?  @default("Padrão Nacional")
+  certificadoDigitalConfigurado Boolean @default(false)
+  certificadoValidade    DateTime?
+  cscId                  String?
+  cscToken               String?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
@@ -150,3 +416,591 @@ model PushSubscription {
 
   @@map("push_subscriptions")
 }
+
+model OSStatusHistory {
+  id             String       @id @default(uuid())
+  ordemServicoId String
+  ordemServico   OrdemServico @relation(fields: [ordemServicoId], references: [id], onDelete: Cascade)
+  statusAnterior StatusOS?
+  statusNovo     StatusOS
+  usuarioId      String?
+  createdAt      DateTime     @default(now())
+
+  @@map("os_historico_status")
+}
+
+model Fornecedor {
+  id                String   @id @default(uuid())
+  tipoPessoa        String   @default("PJ") // PF | PJ
+  documento         String?  @unique // CPF ou CNPJ
+  razaoSocial       String
+  nomeFantasia      String?
+  inscricaoEstadual String?
+  telefone          String?
+  celular           String?
+  whatsapp          String?
+  email             String?
+  contato           String?
+  cep               String?
+  endereco          String?
+  numero            String?
+  complemento       String?
+  bairro            String?
+  cidade            String?
+  uf                String?
+  observacoes       String?
+  status            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  compras           Compra[]
+  contasPagar       ContaPagar[]
+
+  @@map("fornecedores")
+}
+
+enum StatusCompra {
+  RASCUNHO
+  CONFIRMADA
+  CANCELADA
+}
+
+model Compra {
+  id                  String       @id @default(uuid())
+  numeroCompra        Int          @default(autoincrement()) @unique
+  fornecedorId        String
+  fornecedor          Fornecedor   @relation(fields: [fornecedorId], references: [id])
+  numeroNotaFiscal    String?
+  serieNotaFiscal     String?
+  chaveAcessoNfe      String?
+  dataEmissao         DateTime?
+  dataEntrada         DateTime     @default(now())
+  status              StatusCompra @default(RASCUNHO)
+  condicaoPagamento   String?      // A_VISTA | PARCELADO | 30_DIAS | etc
+  subtotal            Decimal      @default(0) @db.Decimal(10, 2)
+  desconto            Decimal      @default(0) @db.Decimal(10, 2)
+  acrescimo           Decimal      @default(0) @db.Decimal(10, 2)
+  valorTotal          Decimal      @default(0) @db.Decimal(10, 2)
+  observacoes         String?
+  usuarioId           String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  itens               ItemCompra[]
+  contasPagar         ContaPagar[]
+
+  @@map("compras")
+}
+
+model ItemCompra {
+  id                 String   @id @default(uuid())
+  compraId           String
+  compra             Compra   @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  produtoId          String
+  produto            Produto  @relation(fields: [produtoId], references: [id])
+  codigoFornecedor   String?
+  referencia         String?
+  quantidade         Decimal  @db.Decimal(10, 2)
+  unidade            String   @default("UN")
+  custoUnitario      Decimal  @db.Decimal(10, 2)
+  desconto           Decimal  @default(0) @db.Decimal(10, 2)
+  acrescimo          Decimal  @default(0) @db.Decimal(10, 2)
+  subtotal           Decimal  @db.Decimal(10, 2)
+  createdAt          DateTime @default(now())
+
+  @@map("itens_compra")
+}
+
+// ==========================================
+// ETAPA 9: MODELOS DO NÚCLEO FINANCEIRO
+// ==========================================
+
+enum StatusTitulo {
+  ABERTO
+  PARCIAL
+  VENCIDO
+  LIQUIDADO
+  CANCELADO
+}
+
+enum TipoMovimentacaoFinanceira {
+  ENTRADA
+  SAIDA
+  SUPRIMENTO
+  RETIRADA
+  TRANSFERENCIA
+}
+
+model PlanoContas {
+  id            String                    @id @default(uuid())
+  codigo        String?                   @unique
+  descricao     String
+  tipo          String                    @default("DESPESA") // RECEITA | DESPESA
+  categoriaPaiId String?
+  status        Boolean                   @default(true)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  contasReceber ContaReceber[]
+  contasPagar   ContaPagar[]
+  movimentacoes MovimentacaoFinanceira[]
+
+  @@map("plano_contas")
+}
+
+model ContaBancaria {
+  id            String                    @id @default(uuid())
+  nome          String                    // Ex: Itaú PJ, Bradesco, Cofre Principal
+  banco         String?                   // Ex: Banco Itaú (341)
+  agencia       String?
+  conta         String?
+  tipo          String                    @default("CORRENTE") // CORRENTE | POUPANCA | CARTEIRA_DIGITAL | CAIXA_FISICO
+  saldoInicial  Decimal                   @default(0) @db.Decimal(10, 2)
+  saldoAtual    Decimal                   @default(0) @db.Decimal(10, 2)
+  status        Boolean                   @default(true)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  movimentacoes MovimentacaoFinanceira[]
+
+  @@map("contas_bancarias")
+}
+
+model SessaoCaixa {
+  id              String                    @id @default(uuid())
+  usuarioId       String
+  dataAbertura    DateTime                  @default(now())
+  dataFechamento  DateTime?
+  saldoInicial    Decimal                   @default(0) @db.Decimal(10, 2)
+  saldoCalculado  Decimal                   @default(0) @db.Decimal(10, 2)
+  saldoInformado  Decimal?                  @db.Decimal(10, 2)
+  diferenca       Decimal?                  @db.Decimal(10, 2)
+  status          String                    @default("ABERTO") // ABERTO | FECHADO
+  observacoes     String?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  movimentacoes   MovimentacaoFinanceira[]
+
+  @@map("sessoes_caixa")
+}
+
+model ContaReceber {
+  id                String                   @id @default(uuid())
+  numeroTitulo      Int                      @default(autoincrement()) @unique
+  titulo            String
+  origem            String                   @default("MANUAL") // MANUAL | ORDEM_SERVICO | VENDA
+  ordemServicoId    String?
+  ordemServico      OrdemServico?            @relation(fields: [ordemServicoId], references: [id])
+  clienteId         String?
+  cliente           Cliente?                 @relation(fields: [clienteId], references: [id])
+  planoContasId     String?
+  planoContas       PlanoContas?             @relation(fields: [planoContasId], references: [id])
+  parcelaAtual      Int                      @default(1)
+  totalParcelas     Int                      @default(1)
+  dataEmissao       DateTime                 @default(now())
+  dataVencimento    DateTime
+  valorBruto        Decimal                  @db.Decimal(10, 2)
+  desconto          Decimal                  @default(0) @db.Decimal(10, 2)
+  acrescimo         Decimal                  @default(0) @db.Decimal(10, 2)
+  jurosMulta        Decimal                  @default(0) @db.Decimal(10, 2)
+  valorLiquido      Decimal                  @db.Decimal(10, 2)
+  valorPago         Decimal                  @default(0) @db.Decimal(10, 2)
+  valorEmAberto     Decimal                  @db.Decimal(10, 2)
+  status            StatusTitulo             @default(ABERTO)
+  formaPagamento    String?
+  dataBaixa         DateTime?
+  observacoes       String?
+  usuarioId         String?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  movimentacoes     MovimentacaoFinanceira[]
+
+  @@map("contas_receber")
+}
+
+model ContaPagar {
+  id                String                   @id @default(uuid())
+  numeroTitulo      Int                      @default(autoincrement()) @unique
+  titulo            String
+  origem            String                   @default("MANUAL") // MANUAL | COMPRA | DESPESA
+  compraId          String?
+  compra            Compra?                  @relation(fields: [compraId], references: [id])
+  fornecedorId      String?
+  fornecedor        Fornecedor?              @relation(fields: [fornecedorId], references: [id])
+  planoContasId     String?
+  planoContas       PlanoContas?             @relation(fields: [planoContasId], references: [id])
+  parcelaAtual      Int                      @default(1)
+  totalParcelas     Int                      @default(1)
+  dataEmissao       DateTime                 @default(now())
+  dataVencimento    DateTime
+  valorBruto        Decimal                  @db.Decimal(10, 2)
+  desconto          Decimal                  @default(0) @db.Decimal(10, 2)
+  acrescimo         Decimal                  @default(0) @db.Decimal(10, 2)
+  jurosMulta        Decimal                  @default(0) @db.Decimal(10, 2)
+  valorLiquido      Decimal                  @db.Decimal(10, 2)
+  valorPago         Decimal                  @default(0) @db.Decimal(10, 2)
+  valorEmAberto     Decimal                  @db.Decimal(10, 2)
+  status            StatusTitulo             @default(ABERTO)
+  formaPagamento    String?
+  dataBaixa         DateTime?
+  observacoes       String?
+  usuarioId         String?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  movimentacoes     MovimentacaoFinanceira[]
+
+  @@map("contas_pagar")
+}
+
+model MovimentacaoFinanceira {
+  id                String                     @id @default(uuid())
+  tipo              TipoMovimentacaoFinanceira
+  descricao         String
+  valor             Decimal                    @db.Decimal(10, 2)
+  dataMovimentacao  DateTime                   @default(now())
+  formaPagamento    String                     @default("DINHEIRO")
+  origem            String                     @default("MANUAL") // RECEBIMENTO | PAGAMENTO | SUPRIMENTO | RETIRADA | TRANSFERENCIA
+  contaReceberId    String?
+  contaReceber      ContaReceber?              @relation(fields: [contaReceberId], references: [id])
+  contaPagarId      String?
+  contaPagar        ContaPagar?                @relation(fields: [contaPagarId], references: [id])
+  contaBancariaId   String?
+  contaBancaria     ContaBancaria?             @relation(fields: [contaBancariaId], references: [id])
+  sessaoCaixaId     String?
+  sessaoCaixa       SessaoCaixa?               @relation(fields: [sessaoCaixaId], references: [id])
+  planoContasId     String?
+  planoContas       PlanoContas?               @relation(fields: [planoContasId], references: [id])
+  isEstorno         Boolean                    @default(false)
+  estornado         Boolean                    @default(false)
+  motivoEstorno     String?
+  dataEstorno       DateTime?
+  movimentacaoPaiId String?
+  observacao        String?
+  observacoes       String?
+  usuarioId         String?
+  createdAt         DateTime                   @default(now())
+
+  @@map("movimentacoes_financeiras")
+}
+
+// ==========================================
+// ETAPA 10: MODELOS DO NÚCLEO FISCAL
+// ==========================================
+
+enum TipoDocumentoFiscal {
+  NFE
+  NFCE
+  NFSE
+}
+
+enum StatusDocumentoFiscal {
+  RASCUNHO
+  PENDENTE
+  PROCESSANDO
+  AUTORIZADA
+  REJEITADA
+  CANCELADA
+  DENEGADA
+  INUTILIZADA
+  ERRO
+}
+
+model DocumentoFiscal {
+  id                    String                 @id @default(uuid())
+  tipo                  TipoDocumentoFiscal
+  numero                Int?
+  serie                 String                 @default("1")
+  chave                 String?                @unique
+  protocolo             String?
+  status                StatusDocumentoFiscal  @default(RASCUNHO)
+  ambiente              String                 @default("HOMOLOGACAO") // HOMOLOGACAO | PRODUCAO
+  dataEmissao           DateTime               @default(now())
+  dataAutorizacao       DateTime?
+  dataCancelamento      DateTime?
+  valorTotal            Decimal                @db.Decimal(10, 2)
+  valorProdutos         Decimal                @default(0) @db.Decimal(10, 2)
+  valorServicos         Decimal                @default(0) @db.Decimal(10, 2)
+  valorImpostos         Decimal                @default(0) @db.Decimal(10, 2)
+  xmlEnviado            String?
+  xmlAutorizado         String?
+  motivo                String?
+  mensagemFiscal        String?
+  protocoloCancelamento String?
+  ordemServicoId        String?
+  ordemServico          OrdemServico?          @relation(fields: [ordemServicoId], references: [id])
+  clienteId             String?
+  cliente               Cliente?               @relation(fields: [clienteId], references: [id])
+  usuarioId             String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  historico             HistoricoFiscal[]
+
+  @@map("documentos_fiscais")
+}
+
+model HistoricoFiscal {
+  id                String                @id @default(uuid())
+  documentoFiscalId String
+  documentoFiscal   DocumentoFiscal       @relation(fields: [documentoFiscalId], references: [id], onDelete: Cascade)
+  statusAnterior    StatusDocumentoFiscal?
+  statusNovo        StatusDocumentoFiscal
+  mensagem          String?
+  protocolo         String?
+  usuarioId         String?
+  createdAt         DateTime              @default(now())
+
+  @@map("historico_fiscal")
+}
+
+// ==========================================
+// ETAPA 11: MODELOS DO NÚCLEO CRM E FIDELIZAÇÃO
+// ==========================================
+
+model PrevisaoRetorno {
+  id             String        @id @default(uuid())
+  clienteId      String
+  cliente        Cliente       @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  veiculoId      String
+  veiculo        Vehicle       @relation(fields: [veiculoId], references: [id], onDelete: Cascade)
+  servicoId      String?
+  servico        Servico?      @relation(fields: [servicoId], references: [id])
+  ordemServicoId String?
+  ordemServico   OrdemServico? @relation(fields: [ordemServicoId], references: [id])
+  dataBase       DateTime      @default(now())
+  kmBase         Int?
+  dataPrevista   DateTime?
+  kmPrevisto     Int?
+  motivo         String
+  status         String        @default("PREVISTO") // PREVISTO | PROXIMO | DEVIDO | ATRASADO | CONCLUIDO | IGNORADO
+  concluidoEm    DateTime?
+  observacoes    String?
+  usuarioId      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([clienteId])
+  @@index([veiculoId])
+  @@index([status])
+  @@index([dataPrevista])
+  @@map("previsoes_retorno")
+}
+
+model TarefaFollowUp {
+  id                  String        @id @default(uuid())
+  clienteId           String
+  cliente             Cliente       @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  veiculoId           String?
+  veiculo             Vehicle?      @relation(fields: [veiculoId], references: [id])
+  ordemServicoId      String?
+  ordemServico        OrdemServico? @relation(fields: [ordemServicoId], references: [id])
+  titulo              String
+  descricao           String?
+  dataAgendada        DateTime
+  responsavelId       String?
+  responsavel         Usuario?      @relation(fields: [responsavelId], references: [id])
+  status              String        @default("PENDENTE") // PENDENTE | EM_ANDAMENTO | CONCLUIDO | CANCELADO
+  origem              String        @default("MANUAL") // MANUAL | RETORNO | ORCAMENTO_EXPIRADO | INATIVO | ANIVERSARIO
+  concluidoEm         DateTime?
+  observacaoConclusao String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([clienteId])
+  @@index([responsavelId])
+  @@index([status])
+  @@index([dataAgendada])
+  @@map("tarefas_followup")
+}
+
+model Tag {
+  id        String       @id @default(uuid())
+  nome      String       @unique
+  cor       String       @default("#3B82F6")
+  descricao String?
+  createdAt DateTime     @default(now())
+  clientes  ClienteTag[]
+
+  @@map("tags")
+}
+
+model ClienteTag {
+  id        String   @id @default(uuid())
+  clienteId String
+  cliente   Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([clienteId, tagId])
+  @@map("cliente_tags")
+}
+
+model ObservacaoCliente {
+  id        String   @id @default(uuid())
+  clienteId String
+  cliente   Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+  conteudo  String
+  createdAt DateTime @default(now())
+
+  @@map("observacoes_cliente")
+}
+
+// ==========================================
+// ETAPA 13: MODELOS DO SPED FISCAL
+// ==========================================
+
+enum StatusPeriodoFiscal {
+  ABERTO
+  EM_PROCESSAMENTO
+  VALIDADO
+  EXPORTADO
+  FECHADO
+}
+
+model PeriodoFiscal {
+  id                 String               @id @default(uuid())
+  competencia        String               // YYYY-MM
+  dataInicio         DateTime
+  dataFim            DateTime
+  status             StatusPeriodoFiscal  @default(ABERTO)
+  layoutVersao       String               @default("017") // Versão do layout SPED EFD ICMS/IPI
+  snapshotConfig     String?              // JSON stringified com o snapshot de EmpresaConfig e ConfiguracaoFiscal
+  totalEntradas      Decimal              @default(0) @db.Decimal(10, 2)
+  totalSaidas        Decimal              @default(0) @db.Decimal(10, 2)
+  totalDocumentos    Int                  @default(0)
+  totalInconsistencias Int                @default(0)
+  fechadoEm          DateTime?
+  fechadoPorUsuarioId String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  arquivos           SpedFile[]
+  inconsistencias    SpedInconsistencia[]
+  auditorias         SpedAuditoria[]
+
+  @@unique([competencia])
+  @@map("periodos_fiscais")
+}
+
+model SpedFile {
+  id              String        @id @default(uuid())
+  periodoFiscalId String
+  periodoFiscal   PeriodoFiscal @relation(fields: [periodoFiscalId], references: [id], onDelete: Cascade)
+  nomeArquivo     String
+  conteudoTxt     String        // Arquivo TXT do SPED estruturado
+  hashArquivo     String
+  layoutVersao    String        @default("017")
+  totalRegistros  Int           @default(0)
+  usuarioId       String?
+  createdAt       DateTime      @default(now())
+
+  @@map("sped_arquivos")
+}
+
+model SpedInconsistencia {
+  id              String        @id @default(uuid())
+  periodoFiscalId String
+  periodoFiscal   PeriodoFiscal @relation(fields: [periodoFiscalId], references: [id], onDelete: Cascade)
+  tipo            String        @default("ERRO") // ERRO | AVISO
+  entidade        String        // Produto, Cliente, Fornecedor, DocumentoFiscal, etc
+  registroId      String?
+  campo           String?
+  valorAtual      String?
+  motivo          String
+  acaoRecomendada String?
+  createdAt       DateTime      @default(now())
+
+  @@map("sped_inconsistencias")
+}
+
+model SpedAuditoria {
+  id              String        @id @default(uuid())
+  periodoFiscalId String
+  periodoFiscal   PeriodoFiscal @relation(fields: [periodoFiscalId], references: [id], onDelete: Cascade)
+  usuarioId       String?
+  acao            String        // PROCESSAR | VALIDAR | GERAR | EXPORTAR | FECHAR | REABRIR
+  detalhes        String?
+  createdAt       DateTime      @default(now())
+
+  @@map("sped_auditorias")
+}
+
+// ==========================================
+// ETAPA 16: ESTRUTURA DE LOTE E LOGS DE MIGRAÇÃO OSDIG
+// ==========================================
+
+enum StatusMigrationBatch {
+  PREPARANDO
+  VALIDANDO
+  EM_EXECUCAO
+  CONCLUIDO
+  CONCLUIDO_COM_ALERTAS
+  ERRO
+  CANCELADO
+}
+
+model MigrationBatch {
+  id                 String               @id @default(uuid())
+  nome               String
+  origem             String               @default("OSDIG")
+  modo               String               @default("HOMOLOGACAO_AMOSTRA") // HOMOLOGACAO_AMOSTRA | COMPLETO
+  status             StatusMigrationBatch @default(PREPARANDO)
+  iniciadoEm         DateTime             @default(now())
+  finalizadoEm       DateTime?
+  usuarioResponsavel String?
+  totalRegistros     Int                  @default(0)
+  totalCriados       Int                  @default(0)
+  totalAtualizados   Int                  @default(0)
+  totalIgnorados     Int                  @default(0)
+  totalConflitos     Int                  @default(0)
+  totalErros         Int                  @default(0)
+  hashArquivoOrigem  String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  logs               MigrationLog[]
+
+  @@map("migration_batches")
+}
+
+model MigrationLog {
+  id               String         @id @default(uuid())
+  migrationBatchId String
+  migrationBatch   MigrationBatch @relation(fields: [migrationBatchId], references: [id], onDelete: Cascade)
+  entidade         String         // Cliente, Vehicle, Produto, Servico, Fornecedor, OrdemServico, etc.
+  osdigId          String?
+  acao             String         // CREATE | UPDATE | SKIP | CONFLICT | ERROR
+  registroId       String?        // ID gerado/existente no Lemoka
+  status           String         @default("SUCESSO") // SUCESSO | ALERTA | ERRO
+  mensagem         String
+  erroTecnico      String?
+  createdAt        DateTime       @default(now())
+
+  @@index([migrationBatchId])
+  @@index([entidade, osdigId])
+  @@map("migration_logs")
+}
+
+// ==========================================
+// ETAPA 18: VALIDAÇÃO PÓS-MIGRAÇÃO E CONCILIAÇÃO
+// ==========================================
+
+model MigrationAuditRecord {
+  id              String   @id @default(uuid())
+  entidade        String   // Cliente, Vehicle, Produto, Servico, Fornecedor, OrdemServico, ContaReceber, ContaPagar, etc.
+  registroId      String?  // ID no Lemoka
+  osdigId         String?  // ID de Origem OSDIG
+  descricao       String
+  severidade      String   @default("ALERTA") // ALERTA | CONFLITO | ERRO | OK
+  status          String   @default("PENDENTE") // PENDENTE | REVISADO | RESOLVIDO
+  motivo          String
+  acaoRecomendada String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([entidade])
+  @@index([severidade])
+  @@index([status])
+  @@map("migration_audit_records")
+}
+
+
+
+
+
